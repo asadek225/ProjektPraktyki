@@ -17,7 +17,7 @@ class TruthTable:
         if not isinstance(perm, (list, tuple)) or len(perm) != N:
             raise ValueError("Invalid permutation length")
         if sorted(perm) != list(range(N)):
-            raise ValueError("Invalid permutation elements")
+            raise ValueError("Invalid permutation elments")
 
     @staticmethod
     def _idx_to_bits(idx: int, n: int):
