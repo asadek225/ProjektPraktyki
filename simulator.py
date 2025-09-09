@@ -3,6 +3,7 @@ import gates
 
 class TruthTable:
     def __init__(self, num_qubits: int):
+        self.n = num_qubits
         self.vectors = [list(bits) for bits in itertools.product([0, 1], repeat=num_qubits)]
 
     def get_vectors(self):
@@ -10,6 +11,27 @@ class TruthTable:
 
     def get_single_vector(self, index: int):
         return self.vectors[index]
+
+    def _check_perm(self, perm):
+        N = 1 << self.n
+        if not isinstance(perm, (list, tuple)) or len(perm) != N:
+            raise ValueError("Invalid permutation length")
+        if sorted(perm) != list(range(N)):
+            raise ValueError("Invalid permutation elements")
+
+    @staticmethod
+    def _idx_to_bits(idx: int, n: int):
+        return [int(b) for b in format(idx, f'0{n}b')]
+
+    def set_output_permutation(self, perm):
+        """
+        Ustawia tablice prawdy na podstawie podanej permutacji
+        Przyklad (n = 3): set_output_permutation([3,7,1,0,4,6,2,5]) ustawia:
+        f(0) = 3, f(1) = 7, f(2) = 1, f(3) = 0, f(4) = 4, f(5) = 6, f(6) = 2, f(7) = 5
+        """
+        self._check_perm(perm)
+        self.vectors = [self._idx_to_bits(i, self.n) for i in perm]
+        return self
 
 class LogicGate:
     def __init__(self, truth_table: TruthTable):
