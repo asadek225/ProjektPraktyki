@@ -1,22 +1,27 @@
-# main.py
-from simulator import LogicGate, Circuit, TruthTable, Synthesizer
+from simulator import Synthesizer, TruthTable, LogicGate
 
-q_num = 3
-tt = TruthTable(q_num)
-simulator = LogicGate(tt)
-circuit = Circuit()
+# Inicjalizacja syntezy dla 3 qubitów
+synthesizer = Synthesizer(3)
 
-# Use Synthesizer
-permutation = [1, 0, 2, 3, 4, 5, 6, 7]  # Example permutation
-synth = Synthesizer(simulator, circuit, q_num)
-synth.synthesize(permutation)
+# Przykładowa permutacja
+perm = [0, 1, 2, 3, 4, 6, 5, 7]
 
-print("\nCircuit after synthesis:")
+# Uruchomienie syntezy
+circuit = synthesizer.synthesize(perm)
+
+print("\nWygenerowany obwód:")
 circuit.show_instructions()
 
-print("\nTruth Table After synthesis:")
-print(tt.get_vectors())
+print("\nTablica prawdy po syntezie:")
+print(synthesizer.truth_table.get_vectors())
 
-circuit.apply_all_gates(simulator)
-print("\nTruth Table After Circuit Execution:")
-print(tt.get_vectors())
+# Weryfikacja - wykonanie wygenerowanych instrukcji na nowej tablicy
+test_table = TruthTable(3)
+test_gate = LogicGate(test_table)
+
+print("\nWykonanie instrukcji na nowej tablicy prawdy:")
+print("Stan początkowy:", test_table.get_vectors())
+
+circuit.apply_all_gates(test_gate)
+
+print("Stan po wykonaniu instrukcji:", test_table.get_vectors_as_ints())

@@ -11,6 +11,14 @@ class TruthTable:
     def get_single_vector(self, index: int):
         return self.vectors[index]
 
+    def get_vectors_as_ints(self):
+        int_states = []
+        for vector in self.vectors:
+            binary_str = ''.join(map(str, vector))
+            int_states.append(int(binary_str, 2))
+        return int_states
+
+
 class LogicGate:
     def __init__(self, truth_table: TruthTable):
         self.truth_table = truth_table
@@ -64,71 +72,63 @@ class Circuit:
     def remove_all_instructions(self):
         self.instructions.clear()
 
+
 class Synthesizer:
-    def __init__(self, simulator: LogicGate, circuit: Circuit, num_qubits: int):
-        self.simulator = simulator
-        self.circuit = circuit
+    def __init__(self, num_qubits: int):
         self.num_qubits = num_qubits
+        self.circuit = Circuit()
+        self.truth_table = TruthTable(num_qubits)
+        self.logic_gate = LogicGate(self.truth_table)
 
-    @staticmethod
-    def bit(num: int, pos: int) -> int:
-        return (num >> pos) & 1
+    def permutate_vectors(self, permutation: list) -> None:
+        # Permutujemy wektory według zadanej permutacji
+        original_vectors = self.truth_table.get_vectors()
+        permutated = [original_vectors[p] for p in permutation]
+        self.truth_table.vectors = permutated
 
-    @staticmethod
-    def bits_where_1(num: int, m: int) -> list:
-        return [j for j in range(m) if Synthesizer.bit(num, j) == 1]
+    def apply_not(self, target: int):
+        self.logic_gate.apply_gate_to_all(target)
 
-    @staticmethod
-    def apply_not(f: list, target: int):
-        for idx in range(len(f)):
-            f[idx] ^= (1 << target)
-
-    @staticmethod
-    def apply_toffoli(f: list, controls: list, target: int):
-        for idx in range(len(f)):
-            if all(Synthesizer.bit(f[idx], c) == 1 for c in controls):
-                f[idx] ^= (1 << target)
+    def apply_toffoli(self, target: int, *controls: int):
+        self.logic_gate.apply_gate_to_all(target, *controls)
 
     def synthesize(self, permutation: list) -> Circuit:
-        f = permutation[:]
-        print(f"\nStart: {f}")
+        print("\nPoczątkowa tablica prawdy:")
+        print(self.truth_table.get_vectors())
 
-        # Step 1: Fix f[0]
-        if f[0] != 0:
-            bits_to_invert = self.bits_where_1(f[0], self.num_qubits)
-            for bitpos in bits_to_invert:
-                self.apply_not(f, bitpos)
-                reversed_bitpos = self.num_qubits - 1 - bitpos
-                self.circuit.add_gate(reversed_bitpos)
-                print(f"Apply QNOT on q{reversed_bitpos} -> {f}")
+        self.permutate_vectors(permutation)
+        print(f"\nPo permutacji: {self.truth_table.vectors}")
 
-        # Step 2: Fix remaining values
-        for i in range(1, 2 ** self.num_qubits - 1):
-            if f[i] == i:
-                continue
+        # Krok 1: Napraw pierwszy wektor
+        first_vector = self.truth_table.get_single_vector(0)
+        for i, bit in enumerate(first_vector):
+            if bit == 1:
+                self.apply_not(i)
+                self.circuit.add_gate(i)
+                print(f"Apply QNOT on q{self.num_qubits - 1 - i} -> {self.truth_table.vectors}")
 
-            source = f[i]
-            p = [j for j in range(self.num_qubits) if self.bit(i, j) == 1 and self.bit(source, j) == 0]
-            q = [j for j in range(self.num_qubits) if self.bit(i, j) == 0 and self.bit(source, j) == 1]
+        # Krok 2: Napraw pozostałe wektory (od największego indeksu)
+        for i in range(2 ** self.num_qubits - 1, 0, -1):
+            target_vector = [int(x) for x in format(i, f'0{self.num_qubits}b')]
+            current_vector = self.truth_table.get_single_vector(i)
 
-            for j in p:
-                controls = [k for k in range(self.num_qubits) if self.bit(i, k) == 1 and k != j]
-                self.apply_toffoli(f, controls, j)
-                reversed_target = self.num_qubits - 1 - j
-                reversed_controls = [self.num_qubits - 1 - k for k in controls]
-                self.circuit.add_gate(reversed_target, *reversed_controls)
-                gate_name = "CNOT" if len(controls) == 1 else "TOF"
-                print(
-                    f"Apply {gate_name} target=q{reversed_target} controls={[f'q{c}' for c in reversed_controls]} -> {f}")
+            if current_vector != target_vector:
+                diff_positions = [j for j in range(self.num_qubits) if current_vector[j] != target_vector[j]]
+                for target in diff_positions:
+                    # Zawsze używamy co najmniej 2 kontroli
+                    controls = [k for k in range(self.num_qubits)
+                                if k != target and target_vector[k] == 1 and current_vector[k] == 1]
 
-            for j in q:
-                controls = [k for k in range(self.num_qubits) if self.bit(source, k) == 1 and k != j]
-                self.apply_toffoli(f, controls, j)
-                reversed_target = self.num_qubits - 1 - j
-                reversed_controls = [self.num_qubits - 1 - k for k in controls]
-                self.circuit.add_gate(reversed_target, *reversed_controls)
-                gate_name = "CNOT" if len(controls) == 1 else "TOF"
-                print(
-                    f"Apply {gate_name} target=q{reversed_target} controls={[f'q{c}' for c in reversed_controls]} -> {f}")
+                    # Jeśli mamy tylko jedną kontrolę, dodajemy dodatkową kontrolę z bitem 0
+                    if len(controls) == 1:
+                        additional_control = next(k for k in range(self.num_qubits)
+                                                  if k != target and k != controls[0] and target_vector[k] == 0)
+                        controls.append(additional_control)
+
+                    if len(controls) >= 2:
+                        self.apply_toffoli(target, *controls[:2])  # używamy tylko pierwszych dwóch kontroli
+                        self.circuit.add_gate(target, *controls[:2])
+                        print(
+                            f"Apply TOF target=q{self.num_qubits - 1 - target} controls=[q{self.num_qubits - 1 - controls[0]}, q{self.num_qubits - 1 - controls[1]}] -> {self.truth_table.vectors}")
 
         return self.circuit
