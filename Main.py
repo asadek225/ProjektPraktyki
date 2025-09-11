@@ -1,36 +1,27 @@
-# main.py
+from simulator import Synthesizer, TruthTable, LogicGate
 
-from simulator import LogicGate, Circuit, TruthTable
+# Inicjalizacja syntezy dla 3 qubitów
+synthesizer = Synthesizer(3)
 
-# Initialize the simulator for 3 qubits
-tt = TruthTable(4)
-simulator = LogicGate(tt)
-# Create a quantum circuit and add gates
-circuit = Circuit()
-circuit.add_gate(2)                   # QNOT
-circuit.add_gate(0, 1)         # CNOT
-circuit.add_gate(2, 0, 1)       # TOFFOLI
-circuit.add_gate(1, 0, 2, 3)       # MCT
+# Przykładowa permutacja
+perm = [0, 1, 2, 3, 4, 6, 5, 7]
 
-# Display gate instructions
-print("Quantum Circuit Instructions:")
+# Uruchomienie syntezy
+circuit = synthesizer.synthesize(perm)
+
+print("\nWygenerowany obwód:")
 circuit.show_instructions()
 
-# Print initial truth table
-print("\nTruth Table Before Execution:")
-print(tt.get_vectors())
+print("\nTablica prawdy po syntezie:")
+print(synthesizer.truth_table.get_vectors())
 
-# Apply circuit
-circuit.apply_all_gates(simulator)
-print("\nTruth Table After Execution:")
-print(tt.get_vectors())
+# Weryfikacja - wykonanie wygenerowanych instrukcji na nowej tablicy
+test_table = TruthTable(3)
+test_gate = LogicGate(test_table)
 
-# # Reverse the circuit (undo)
-# circuit.apply_all_gates_reverse(simulator)
-# print("\nTruth Table After Reversing:")
-# print(tt.get_vectors())
+print("\nWykonanie instrukcji na nowej tablicy prawdy:")
+print("Stan początkowy:", test_table.get_vectors())
 
-simulator.apply_gate_to_all(2)# Apply only the CNOT gate
-print(tt.get_vectors())
-circuit.remove_instruction(1)
-circuit.show_instructions()
+circuit.apply_all_gates(test_gate)
+
+print("Stan po wykonaniu instrukcji:", test_table.get_vectors_as_ints())
