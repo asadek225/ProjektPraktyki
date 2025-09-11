@@ -1,6 +1,7 @@
 import itertools
 import gates
 
+
 class TruthTable:
     def __init__(self, num_qubits: int):
         self.n = num_qubits
@@ -11,6 +12,18 @@ class TruthTable:
 
     def get_single_vector(self, index: int):
         return self.vectors[index]
+
+    def set_vectors(self, vectors: list[list[int]]):
+        """
+        Ustawia tablicę prawdy na podaną listę bitów.
+        Każdy element musi być listą długości n.
+        """
+        if not all(len(vec) == self.n for vec in vectors):
+            raise ValueError("Kazdy wektor musi mieć dlugośsc rowna liczbie qubitow")
+        if len(vectors) != (1 << self.n):
+            raise ValueError("Liczba wektorow musi wynosić 2^n")
+        self.vectors = [list(vec) for vec in vectors]
+        return self
 
     def _check_perm(self, perm):
         N = 1 << self.n
@@ -41,6 +54,7 @@ class TruthTable:
         self.vectors = [self._idx_to_bits(i, self.n) for i in perm]
         return self
 
+
 class LogicGate:
     def __init__(self, truth_table: TruthTable):
         self.truth_table = truth_table
@@ -59,6 +73,7 @@ class LogicGate:
     def apply_gate_to_all(self, *qubits: int):
         for vector in self.truth_table.get_vectors():
             self.apply_gate_to_vector(vector, *qubits)
+
 
 class Circuit:
     def __init__(self):
