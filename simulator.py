@@ -1,8 +1,11 @@
+
 import itertools
 import gates
 
+
 class TruthTable:
     def __init__(self, num_qubits: int):
+        self.n = num_qubits
         self.vectors = [list(bits) for bits in itertools.product([0, 1], repeat=num_qubits)]
 
     def get_vectors(self):
@@ -11,12 +14,46 @@ class TruthTable:
     def get_single_vector(self, index: int):
         return self.vectors[index]
 
-    def get_vectors_as_ints(self):
-        int_states = []
-        for vector in self.vectors:
-            binary_str = ''.join(map(str, vector))
-            int_states.append(int(binary_str, 2))
-        return int_states
+    def set_vectors(self, vectors: list[list[int]]):
+        """
+        Ustawia tablicę prawdy na podaną listę bitów.
+        Każdy element musi być listą długości n.
+        """
+        if not all(len(vec) == self.n for vec in vectors):
+            raise ValueError("Kazdy wektor musi mieć dlugośsc rowna liczbie qubitow")
+        if len(vectors) != (1 << self.n):
+            raise ValueError("Liczba wektorow musi wynosić 2^n")
+        self.vectors = [list(vec) for vec in vectors]
+        return self
+
+    def _check_perm(self, perm):
+        N = 1 << self.n
+        if not isinstance(perm, (list, tuple)) or len(perm) != N:
+            raise ValueError("Invalid permutation length")
+        if sorted(perm) != list(range(N)):
+            raise ValueError("Invalid permutation elements")
+
+    @staticmethod
+    def _idx_to_bits(idx: int, n: int):
+        return [int(b) for b in format(idx, f'0{n}b')]
+
+    def perm_to_bitlist(self, perm):
+        """
+        Zamienia permutację indeksów na listę bitów.
+        Zwraca listę [ [bity], [bity], ... ] odpowiadającą elementom perm.
+        """
+        self._check_perm(perm)
+        return [self._idx_to_bits(f, self.n) for f in perm]
+
+    def set_output_permutation(self, perm):
+        """
+        Ustawia tablice prawdy na podstawie podanej permutacji
+        Przyklad (n = 3): set_output_permutation([3,7,1,0,4,6,2,5]) ustawia:
+        f(0) = 3, f(1) = 7, f(2) = 1, f(3) = 0, f(4) = 4, f(5) = 6, f(6) = 2, f(7) = 5
+        """
+        self._check_perm(perm)
+        self.vectors = [self._idx_to_bits(i, self.n) for i in perm]
+        return self
 
 
 class LogicGate:
@@ -37,6 +74,7 @@ class LogicGate:
     def apply_gate_to_all(self, *qubits: int):
         for vector in self.truth_table.get_vectors():
             self.apply_gate_to_vector(vector, *qubits)
+
 
 class Circuit:
     def __init__(self):
@@ -71,64 +109,3 @@ class Circuit:
 
     def remove_all_instructions(self):
         self.instructions.clear()
-
-
-class Synthesizer:
-    def __init__(self, num_qubits: int):
-        self.num_qubits = num_qubits
-        self.circuit = Circuit()
-        self.truth_table = TruthTable(num_qubits)
-        self.logic_gate = LogicGate(self.truth_table)
-
-    def permutate_vectors(self, permutation: list) -> None:
-        # Permutujemy wektory według zadanej permutacji
-        original_vectors = self.truth_table.get_vectors()
-        permutated = [original_vectors[p] for p in permutation]
-        self.truth_table.vectors = permutated
-
-    def apply_not(self, target: int):
-        self.logic_gate.apply_gate_to_all(target)
-
-    def apply_toffoli(self, target: int, *controls: int):
-        self.logic_gate.apply_gate_to_all(target, *controls)
-
-    def synthesize(self, permutation: list) -> Circuit:
-        print("\nPoczątkowa tablica prawdy:")
-        print(self.truth_table.get_vectors())
-
-        self.permutate_vectors(permutation)
-        print(f"\nPo permutacji: {self.truth_table.vectors}")
-
-        # Krok 1: Napraw pierwszy wektor
-        first_vector = self.truth_table.get_single_vector(0)
-        for i, bit in enumerate(first_vector):
-            if bit == 1:
-                self.apply_not(i)
-                self.circuit.add_gate(i)
-                print(f"Apply QNOT on q{self.num_qubits - 1 - i} -> {self.truth_table.vectors}")
-
-        # Krok 2: Napraw pozostałe wektory (od największego indeksu)
-        for i in range(2 ** self.num_qubits - 1, 0, -1):
-            target_vector = [int(x) for x in format(i, f'0{self.num_qubits}b')]
-            current_vector = self.truth_table.get_single_vector(i)
-
-            if current_vector != target_vector:
-                diff_positions = [j for j in range(self.num_qubits) if current_vector[j] != target_vector[j]]
-                for target in diff_positions:
-                    # Zawsze używamy co najmniej 2 kontroli
-                    controls = [k for k in range(self.num_qubits)
-                                if k != target and target_vector[k] == 1 and current_vector[k] == 1]
-
-                    # Jeśli mamy tylko jedną kontrolę, dodajemy dodatkową kontrolę z bitem 0
-                    if len(controls) == 1:
-                        additional_control = next(k for k in range(self.num_qubits)
-                                                  if k != target and k != controls[0] and target_vector[k] == 0)
-                        controls.append(additional_control)
-
-                    if len(controls) >= 2:
-                        self.apply_toffoli(target, *controls[:2])  # używamy tylko pierwszych dwóch kontroli
-                        self.circuit.add_gate(target, *controls[:2])
-                        print(
-                            f"Apply TOF target=q{self.num_qubits - 1 - target} controls=[q{self.num_qubits - 1 - controls[0]}, q{self.num_qubits - 1 - controls[1]}] -> {self.truth_table.vectors}")
-
-        return self.circuit
