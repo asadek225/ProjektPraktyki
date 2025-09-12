@@ -1,6 +1,6 @@
-
 import itertools
 import gates
+from typing import List
 
 
 class TruthTable:
@@ -14,7 +14,7 @@ class TruthTable:
     def get_single_vector(self, index: int):
         return self.vectors[index]
 
-    def set_vectors(self, vectors: list[list[int]]):
+    def set_vectors(self, vectors: List[List[int]]):
         """
         Ustawia tablicę prawdy na podaną listę bitów.
         Każdy element musi być listą długości n.
@@ -54,6 +54,13 @@ class TruthTable:
         self._check_perm(perm)
         self.vectors = [self._idx_to_bits(i, self.n) for i in perm]
         return self
+
+    def get_vectors_as_ints(self):
+        """
+        Zwraca wektory jako listę liczb całkowitych.
+        Każdy wektor bitów jest konwertowany na odpowiednią liczbę dziesiętną.
+        """
+        return [int(''.join(map(str, vector)), 2) for vector in self.vectors]
 
 
 class LogicGate:
