@@ -69,8 +69,3 @@ def algorithm(f: sim.TruthTable, cir: sim.Circuit, verbose: bool = False):
                 lg.apply_gate_to_all(q[0], *controls)
                 cir.add_gate(q[0], *controls)
     return f
-
-
-class EqualTest(unittest.TestCase):
-    def test(self, f: sim.TruthTable):
-        self.assertEqual(ideal, f, "Tables are equal")
