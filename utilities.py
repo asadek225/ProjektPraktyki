@@ -116,6 +116,7 @@ class LogicGate:
         for vector in truth_table.get_vectors():
             self.apply_gate_to_vector(vector, *self.qubits)
 
+#test
 
 class Circuit:
     def __init__(self):
