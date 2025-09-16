@@ -1,32 +1,32 @@
-import unittest
+from Circuit import Circuit
+from TruthTable import TruthTable
+from LogicGate import LogicGate
 
-import utilities as sim
-from utilities import LogicGate, Circuit, TruthTable
 
-def algorithm(f: sim.TruthTable, verbose: bool = False) -> Circuit:
+def algorithm(f: TruthTable, verbose: bool = False) -> Circuit:
     num_qubits = f.n
     ideal = TruthTable(num_qubits)
-    
+
     cir = Circuit()
-    
-    lg = sim.LogicGate(f)
+
     if verbose:
         print("cel:", ideal.get_vectors())
         print("obecny stan:", f.get_vectors())
 
-    #Step 1:
+    # Step 1:
     while any(f.get_single_vector(0)):
         vec = f.get_single_vector(0)
         for idx, bit in enumerate(vec):
             if bit == 1:
-                lg.apply_gate_to_all(idx)
-                cir.add_gate(idx)
+                temp_gate = LogicGate(idx)
+                temp_gate.apply_gate_to_truth_table(f)
+                cir.add_gate_from_idx(idx)
 
     if verbose:
         print("1. stan:", f.get_vectors())
 
-    #Step 2:
-    for i in range(1, 2**f.n):
+    # Step 2:
+    for i in range(1, 2 ** f.n):
         fv = f.get_single_vector(i)
         iv = ideal.get_single_vector(i)
 
@@ -52,8 +52,9 @@ def algorithm(f: sim.TruthTable, verbose: bool = False) -> Circuit:
             if verbose:
                 print("Ptarget:", target, "Pcontrols:", controls)
 
-            lg.apply_gate_to_all(target, *controls)
-            cir.add_gate(target, *controls)
+            temp_gate = LogicGate(target, *controls)
+            temp_gate.apply_gate_to_truth_table(f)
+            cir.add_gate_from_idx(target, *controls)
 
             fv = f.get_single_vector(i)
             if verbose:
@@ -65,19 +66,14 @@ def algorithm(f: sim.TruthTable, verbose: bool = False) -> Circuit:
             if verbose:
                 print("Qtarget:", target, "Qcontrols:", controls)
 
-            lg.apply_gate_to_all(target, *controls)
-            cir.add_gate(target, *controls)
+            temp_gate = LogicGate(target, *controls)
+            temp_gate.apply_gate_to_truth_table(f)
+            cir.add_gate_from_idx(target, *controls)
             fv = f.get_single_vector(i)
             if verbose:
                 print("po Q:", f.get_vectors())
 
     if verbose:
         cir.show_instructions()
-        
+
     return cir
-
-
-
-# algorithm(tt, cir, verbose=True)
-
-
