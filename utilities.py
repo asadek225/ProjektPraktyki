@@ -84,13 +84,15 @@ class TruthTable:
 
 
 class LogicGate:
-    def __init__(self, truth_table: TruthTable):
-        self.truth_table = truth_table
+    # def __init__(self, truth_table: TruthTable):
+    #     self.truth_table = truth_table
 
-    @staticmethod
-    def apply_gate_to_vector(vector, *qubits: int):
+    def __init__(self, *qubits):
+        self.qubits = qubits
+
+    def apply_gate_to_vector(self, vector):
         if len(qubits) == 1:
-            gates.qnot(vector, qubits[0])
+            gates.qnot(vector, self.qubits[0])
         elif len(qubits) == 2:
             gates.cnot(vector, qubits[0], qubits[1])
         elif len(qubits) == 3:
@@ -98,18 +100,31 @@ class LogicGate:
         elif len(qubits) > 3:
             gates.MCT(vector, qubits[0], *qubits[1:])
 
-    def apply_gate_to_all(self, *qubits: int):
-        for vector in self.truth_table.get_vectors():
-            self.apply_gate_to_vector(vector, *qubits)
+    def apply_gate_to_truth_table(self, truth_table):
+        for vector in truth_table.get_vectors():
+            self.apply_gate_to_vector(vector, *self.qubits)
 
 
 class Circuit:
     def __init__(self):
-        self.instructions = []
+        self.instructions : list[LogicGate] = []
 
-    def add_gate(self, *qubits: int):
-        self.instructions.append(qubits)
+    def add_gate(self, lg: LogicGate):
+        self.instructions.append(lg)
+    
+    def add_gate_from_idx(self, *qubits: int):
+        lg = LogicGate(*qubits)
+        self.add_gate(lg)
 
+    def apply_gate_to_vector(self, vector: list[int]):
+        for lg in self.instructions:
+            lg.apply_gate_to_vector(vector)
+
+    def apply_gate_to_truth_table(self, tt: TruthTable):
+        for lg in self.instructions:
+            lg.apply_gate_to_truth_table(vector)
+
+    
     def apply_gate_at(self, utilities: LogicGate, index: int):
         gate = self.instructions[index]
         utilities.apply_gate_to_all(*gate)
