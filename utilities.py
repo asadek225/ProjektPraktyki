@@ -6,9 +6,14 @@ from typing import List
 
 
 class TruthTable:
-    def __init__(self, num_qubits: int):
+    def __init__(self, num_qubits: int, initial_permutation : list[int] = None):
         self.n = num_qubits
-        self.vectors = [list(bits) for bits in itertools.product([0, 1], repeat=num_qubits)]
+        
+        if(initial_permutation is not None):
+            #...set_output_permutation
+
+        else:
+            self.vectors = [list(bits) for bits in itertools.product([0, 1], repeat=num_qubits)]
 
     def get_vectors(self):
         return self.vectors
@@ -47,15 +52,15 @@ class TruthTable:
         self._check_perm(perm)
         return [self._idx_to_bits(f, self.n) for f in perm]
 
-    def set_output_permutation(self, perm):
-        """
-        Ustawia tablice prawdy na podstawie podanej permutacji
-        Przyklad (n = 3): set_output_permutation([3,7,1,0,4,6,2,5]) ustawia:
-        f(0) = 3, f(1) = 7, f(2) = 1, f(3) = 0, f(4) = 4, f(5) = 6, f(6) = 2, f(7) = 5
-        """
-        self._check_perm(perm)
-        self.vectors = [self._idx_to_bits(i, self.n) for i in perm]
-        return self
+    # def set_output_permutation(self, perm):
+    #     """
+    #     Ustawia tablice prawdy na podstawie podanej permutacji
+    #     Przyklad (n = 3): set_output_permutation([3,7,1,0,4,6,2,5]) ustawia:
+    #     f(0) = 3, f(1) = 7, f(2) = 1, f(3) = 0, f(4) = 4, f(5) = 6, f(6) = 2, f(7) = 5
+    #     """
+    #     self._check_perm(perm)
+    #     self.vectors = [self._idx_to_bits(i, self.n) for i in perm]
+    #     return self
 
     def get_vectors_as_ints(self):
         """
@@ -65,12 +70,17 @@ class TruthTable:
         return [int(''.join(map(str, vector)), 2) for vector in self.vectors]
 
 
-    def all_permutations(self):
+    @staticmethod
+    def all_permutations(n: int) -> list[TruthTable]: # static method factory desgin pattern 
         """
         Generator wszystkich permutacji dla tablicy prawdy
         """
         N = 1 << self.n
-        return itertools.permutations(range(N))
+        all_truth_tables = []
+        for permutation in itertools.permutations(range(N)):
+            tt = TruthTable(n, permutations)
+            all_truth_table.append(tt)
+        return all_truth_tables
 
     def dump_all_perms_jsonl(self, path="permutacje_n3.jsonl"):
         N = 1 << self.n
@@ -82,6 +92,8 @@ class TruthTable:
                 f.write("\n")
         return path
 
+# for tt in TruthTables.all_permutations(3):
+#     circ = synth(tt)
 
 class LogicGate:
     # def __init__(self, truth_table: TruthTable):
