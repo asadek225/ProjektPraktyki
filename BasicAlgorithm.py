@@ -1,14 +1,14 @@
 import unittest
 
 import utilities as sim
+from utilities import LogicGate, Circuit, TruthTable
 
-ideal = sim.TruthTable(3)
-tt = sim.TruthTable(3)
-tt.set_output_permutation([7, 1, 4, 3, 6, 5, 0, 2])
-cir = sim.Circuit()
-
-
-def algorithm(f: sim.TruthTable, cir: sim.Circuit, verbose: bool = False):
+def algorithm(f: sim.TruthTable, verbose: bool = False) -> Circuit:
+    num_qubits = f.n
+    ideal = TruthTable(num_qubits)
+    
+    cir = Circuit()
+    
     lg = sim.LogicGate(f)
     if verbose:
         print("cel:", ideal.get_vectors())
@@ -71,10 +71,13 @@ def algorithm(f: sim.TruthTable, cir: sim.Circuit, verbose: bool = False):
             if verbose:
                 print("po Q:", f.get_vectors())
 
-    cir.show_instructions()
-    return f
+    if verbose:
+        cir.show_instructions()
+        
+    return cir
 
 
 
 # algorithm(tt, cir, verbose=True)
+
 
