@@ -1,3 +1,4 @@
 *.jsonl
 !permutacje_n3.jsonl
 *.json
+.idea
