@@ -1,7 +1,6 @@
 import gzip, json, io
 from collections import Counter
 from contextlib import redirect_stdout
-from Circuit import Circuit
 from TruthTable import TruthTable
 import BasicAlgorithm as al
 

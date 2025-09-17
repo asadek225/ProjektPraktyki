@@ -74,6 +74,6 @@ def algorithm(f: TruthTable, verbose: bool = False) -> Circuit:
                 print("po Q:", f.get_vectors())
 
     if verbose:
-        cir.show_instructions()
+        cir.show_gates()
 
     return cir

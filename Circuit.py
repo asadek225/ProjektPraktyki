@@ -13,23 +13,19 @@ class Circuit:
         lg = LogicGate(*qubits)
         self.add_gate(lg)
 
-    def apply_gate_to_vector(self, vector: List[int]):
+    def apply_circuit_to_vector(self, vector: List[int]):
         for lg in self.instructions:
             lg.apply_gate_to_vector(vector)
 
-    def apply_gate_to_truth_table(self, tt: TruthTable):
-        for lg in self.instructions:
-            lg.apply_gate_to_truth_table(tt)
-
-    def apply_all_gates(self, tt: TruthTable):
+    def apply_circuit(self, tt: TruthTable):
         for gate in self.instructions:
             gate.apply_gate_to_truth_table(tt)
 
-    def apply_all_gates_reverse(self, tt: TruthTable):
+    def apply_circuit_reverse(self, tt: TruthTable):
         for gate in reversed(self.instructions):
             gate.apply_gate_to_truth_table(tt)
 
-    def show_instructions(self):
+    def show_gates(self):
         for gate in self.instructions:
             gate_name = {
                 1: "QNOT",
@@ -38,8 +34,8 @@ class Circuit:
             }.get(len(gate.qubits), "MCT")
             print(f"{gate_name}: {gate}")
 
-    def remove_instruction(self, index: int):
+    def remove_gate(self, index: int):
         self.instructions.pop(index)
 
-    def remove_all_instructions(self):
+    def clear(self):
         self.instructions.clear()
