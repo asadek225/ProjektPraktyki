@@ -2,15 +2,18 @@ def qnot(vector, target):
     vector[target] = int(not vector[target])
     return vector
 
+
 def cnot(vector, target, control):
     if vector[control] == 1:
         qnot(vector, target)
     return vector
 
+
 def Toffoli(vector, target, control1, control2):
     if vector[control1] == 1 and vector[control2] == 1:
         qnot(vector, target)
     return vector
+
 
 def MCT(vector, target, *controls):
     if all(vector[i] for i in controls):
@@ -36,3 +39,9 @@ class LogicGate:
     def apply_gate_to_truth_table(self, truth_table):
         for vector in truth_table.get_vectors():
             self.apply_gate_to_vector(vector)
+
+    def get_qubits(self):
+        return self.qubits
+
+    def get_type(self):
+        return len(self.qubits)
