@@ -1,0 +1,24 @@
+[tool.black]
+line-length = 100
+target-version = ["py38","py39","py310","py311","py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = [
+  "if __name__ == .__main__.:",
+  "pragma: no cover",
+]

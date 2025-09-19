@@ -1,6 +1,6 @@
+import gzip
 import itertools
 import json
-import gzip
 from typing import List
 
 
@@ -24,8 +24,8 @@ class TruthTable:
 
     def set_vectors(self, vectors: List[List[int]]):
         """
-        Ustawia tablicę prawdy na podaną listę bitów.
-        Każdy element musi być listą długości n.
+        Sets the truth table to the given list of bits.
+        Each element must be a list of length n.
         """
         if not all(len(vec) == self.n for vec in vectors):
             raise ValueError("Kazdy wektor musi mieć dlugośsc rowna liczbie qubitow")
@@ -47,23 +47,23 @@ class TruthTable:
 
     def perm_to_bitlist(self, perm):
         """
-        Zamienia permutację indeksów na listę bitów.
-        Zwraca listę [ [bity], [bity], ... ] odpowiadającą elementom perm.
+        Converts a permutation of indices to a list of bits.
+        Returns a list [[bits], [bits], ...] corresponding to the elements of perm.
         """
         self._check_perm(perm)
         return [self._idx_to_bits(f, self.n) for f in perm]
 
     def get_vectors_as_ints(self):
         """
-        Zwraca wektory jako listę liczb całkowitych.
-        Każdy wektor bitów jest konwertowany na odpowiednią liczbę dziesiętną.
+        Returns the vectors as a list of integers.
+        Each bit vector is converted to its corresponding decimal number.
         """
         return [int(''.join(map(str, vector)), 2) for vector in self.vectors]
 
     @staticmethod
-    def all_permutations(n: int):  # static method factory desgin pattern
+    def all_permutations(n: int):  # static method factory design pattern
         """
-        Generator wszystkich permutacji dla tablicy prawdy
+        Generator of all permutations for the truth table
         """
         N = 1 << n
         all_truth_tables = []
@@ -82,5 +82,7 @@ class TruthTable:
                 f.write("\n")
         return path
 
-    # for tt in TruthTables.all_permutations(3):
-    #     circ = synth(tt)
+    def __copy__(self):
+        new_tt = TruthTable(self.n)
+        new_tt.vectors = [vec.copy() for vec in self.vectors]
+        return new_tt

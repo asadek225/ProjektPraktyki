@@ -1,6 +1,6 @@
 from Circuit import Circuit
-from TruthTable import TruthTable
 from LogicGate import LogicGate
+from TruthTable import TruthTable
 
 
 def algorithm(f: TruthTable, verbose: bool = False) -> Circuit:
