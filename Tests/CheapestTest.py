@@ -45,7 +45,7 @@ def test_algorithm_restores_ideal_n3(depth):
     original = _random_reversible_tt(n, depth, rng)
 
     f = original.__copy__()
-    cir = algorithm(f, verbose=True)
+    cir = algorithm(f, verbose=False)
 
     ideal = TruthTable(n)
     assert f.get_vectors() == ideal.get_vectors()
@@ -62,7 +62,7 @@ def test_prefix_of_correct_rows_never_decreases_n3():
     start = _random_reversible_tt(n, depth, rng)
 
     f = start.__copy__()
-    cir = algorithm(f, verbose=True)
+    cir = algorithm(f, verbose=False)
 
     ideal = TruthTable(n)
     prev_prefix = 0
@@ -83,7 +83,7 @@ def test_prefers_cheapest_when_safe_simple_qnot_n3():
     LogicGate(0).apply_gate_to_truth_table(tt)
 
     f = tt.__copy__()
-    cir = algorithm(f, verbose=True)
+    cir = algorithm(f, verbose=False)
 
     ideal = TruthTable(n)
     assert f.get_vectors() == ideal.get_vectors()
@@ -97,7 +97,7 @@ def test_gate_types_and_costs_coherent_n3():
     n = 3
     tt = TruthTable(n)
     f = tt.__copy__()
-    cir = algorithm(f, verbose=True)
+    cir = algorithm(f, verbose=False)
 
     cost = _circuit_cost(cir)
     assert cost >= 0
