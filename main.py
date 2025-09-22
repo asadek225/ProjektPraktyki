@@ -7,7 +7,7 @@ from collections import Counter
 from contextlib import redirect_stdout
 from typing import Iterable, List, Tuple
 
-import ComparingAlgorithm as al
+import NumOfGatesOptimized as al
 from TruthTable import TruthTable
 
 

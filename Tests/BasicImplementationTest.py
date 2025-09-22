@@ -1,8 +1,10 @@
 import pytest
-from Circuit import Circuit
-from TruthTable import TruthTable
-from LogicGate import LogicGate, qnot, cnot, Toffoli, MCT
+
 from BasicAlgorithm import algorithm
+from Circuit import Circuit
+from LogicGate import LogicGate, qnot, cnot, Toffoli, MCT
+from TruthTable import TruthTable
+
 
 class TestGates:
     def test_qnot(self):

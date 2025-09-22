@@ -43,7 +43,7 @@ class TruthTable:
 
     @staticmethod
     def _idx_to_bits(idx: int, n: int):
-        return [int(b) for b in format(idx, f'0{n}b')]
+        return [int(b) for b in format(idx, f"0{n}b")]
 
     def perm_to_bitlist(self, perm):
         """
@@ -58,7 +58,7 @@ class TruthTable:
         Returns the vectors as a list of integers.
         Each bit vector is converted to its corresponding decimal number.
         """
-        return [int(''.join(map(str, vector)), 2) for vector in self.vectors]
+        return [int("".join(map(str, vector)), 2) for vector in self.vectors]
 
     @staticmethod
     def all_permutations(n: int):  # static method factory design pattern
