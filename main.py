@@ -161,14 +161,14 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Batch-run ComparingAlgorithm on JSONL permutations.")
     p.add_argument(
         "--input",
-        default="permutacje_n3.jsonl",
+        default="permutacje_n4.jsonl",
         help="Ścieżka do JSONL/JSONL.GZ z permutacjami (bitlisty).",
     )
     p.add_argument(
-        "--output", default="results_n3.jsonl", help="Ścieżka wyjściowa JSONL/JSONL.GZ z wynikami."
+        "--output", default="results_n4.jsonl", help="Ścieżka wyjściowa JSONL/JSONL.GZ z wynikami."
     )
     p.add_argument(
-        "--stats", default="stats_n3.json", help="Ścieżka wyjściowa JSON ze statystykami."
+        "--stats", default="stats_n4.json", help="Ścieżka wyjściowa JSON ze statystykami."
     )
     p.add_argument(
         "--no-suppress", action="store_true", help="Nie tłum stdout (domyślnie wyciszone)."
