@@ -1,6 +1,8 @@
 from typing import List
-from TruthTable import TruthTable
+
 from LogicGate import LogicGate
+from TruthTable import TruthTable
+
 
 class Circuit:
     def __init__(self):
@@ -32,7 +34,7 @@ class Circuit:
                 2: "CNOT",
                 3: "TOFFOLI"
             }.get(len(gate.qubits), "MCT")
-            print(f"{gate_name}: {gate}")
+            print(f"{gate_name}: {gate.get_qubits()}")
 
     def remove_gate(self, index: int):
         self.instructions.pop(index)
